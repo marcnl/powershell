@@ -95,7 +95,7 @@ $date = $(get-date -f dd-MM-yyyy_HHmm)
 Write-Host 'Backup old YaraRules folders from the following Mount Servers:'$mountservers'...'
 foreach ($Session in $Sessions) { Invoke-Command -Session $Session {(Compress-Archive -Path "C:\Program Files\Veeam\Backup and Replication\Backup\YaraRules" -DestinationPath "C:\Program Files\Veeam\Backup and Replication\Backup\YaraRules_Backup-$(get-date -f dd-MM-yyyy_HHmm).zip" -Force )} -ErrorAction SilentlyContinue } 
 #Write-Host "Backup Completed! Backup file YaraRules_Backup-$date.zip created in C:\Program Files\Veeam\Backup and Replication\Backup\"
-Write-Host "Backup Completed!"; Write-Host "Backup file " -NoNewline ; Write-Host "YaraRules_Backup-$date.zip" -ForegroundColor Green -NoNewline ; Write-Host 'created in "C:\Program Files\Veeam\Backup and Replication\Backup\" on the Mount Servers...';
+Write-Host "Backup Completed!"; Write-Host "Backup file " -NoNewline ; Write-Host "YaraRules_Backup-$date.zip " -ForegroundColor Green -NoNewline ; Write-Host 'created in "C:\Program Files\Veeam\Backup and Replication\Backup\" on the Mount Servers...';
 Write-Host 'Removing old YaraRules folders from the following Mount Servers:'$mountservers'...'
 foreach ($Session in $Sessions) { Invoke-Command -Session $Session {(Remove-Item "C:\Program Files\Veeam\Backup and Replication\Backup\YaraRules" -Force -Recurse -ErrorAction SilentlyContinue)} } 
 
