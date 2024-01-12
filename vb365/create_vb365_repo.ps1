@@ -259,7 +259,7 @@ else {
 	
 ## Create the VBO Backup repository with Cache disk and object storage, 1 Year Retention, Snapshot Based
 echo "Creating Backup Repository: $vbobackupreponame ($RetentionPeriod, $RetentionType, $RetentionFrequencyType, $DailyType at $DailyTime)"
-$VboProxy = Get-VBOProxy -hostname $proxyname
-Add-VBORepository -Proxy $VboProxy -Path "$cachepath $S3type $bucketname" -Name "$vbobackupreponame - $S3type - $bucketname" -ObjectStorageRepository $objectstorage -RetentionPeriod $RetentionPeriod -RetentionType $RetentionType -RetentionFrequencyType $RetentionFrequencyType -DailyTime $DailyTime -DailyType $DailyType
+$VboProxy = Get-VBOProxy -hostname $proxyname -WarningAction SilentlyContinue
+Add-VBORepository -Proxy $VboProxy -Path "$cachepath $S3type $bucketname" -Name "$vbobackupreponame - $S3type - $bucketname" -ObjectStorageRepository $objectstorage -RetentionPeriod $RetentionPeriod -RetentionType $RetentionType -RetentionFrequencyType $RetentionFrequencyType -DailyTime $DailyTime -DailyType $DailyType -WarningAction SilentlyContinue
 
 echo "Done!"
