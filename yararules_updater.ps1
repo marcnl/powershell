@@ -8,7 +8,7 @@
     When setting the lab variable to no, it will download all yara rules from the github repo.
  .NOTES  
     File Name  : yararules_updater.ps1
-    Author     : Marc Molleman
+    Author     : Marc M
     Requires   : PowerShell, Veeam Backup & Replication v12.1
 .VERSION
 	1.1
