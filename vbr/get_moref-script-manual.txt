@@ -68,9 +68,9 @@ Full description:
     6c. If you answer yes, it will update all the VMs with the new MoRef ID in the Veeam Configuration Database, by using commands like this where 11111111 is the new vCenter 
         host_id and vm-100x is the new VM object_id:
 
-        .\psql -U postgres -c "\c VeeamBackup;" -c "UPDATE public.BObjects SET host_id =11111111-1111-1111-1111-111111111111, object_id ='vm-1001' WHERE object_id ='vm-0001'"
-        .\psql -U postgres -c "\c VeeamBackup;" -c "UPDATE public.BObjects SET host_id =11111111-1111-1111-1111-111111111111, object_id ='vm-1002' WHERE object_id ='vm-0002'"
-        .\psql -U postgres -c "\c VeeamBackup;" -c "UPDATE public.BObjects SET host_id =11111111-1111-1111-1111-111111111111, object_id ='vm-1003' WHERE object_id ='vm-0003'"
+        .\psql -U postgres -c "\c VeeamBackup;" -c "UPDATE public.BObjects SET host_id ='11111111-1111-1111-1111-111111111111', object_id ='vm-1001' WHERE object_id ='vm-0001'"
+        .\psql -U postgres -c "\c VeeamBackup;" -c "UPDATE public.BObjects SET host_id ='11111111-1111-1111-1111-111111111111', object_id ='vm-1002' WHERE object_id ='vm-0002'"
+        .\psql -U postgres -c "\c VeeamBackup;" -c "UPDATE public.BObjects SET host_id ='11111111-1111-1111-1111-111111111111', object_id ='vm-1003' WHERE object_id ='vm-0003'"
 
 7. Do not touch/edit/update/delete any other files than the vm_list.txt file. All other files will be automatically build!
 
