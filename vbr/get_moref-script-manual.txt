@@ -1,5 +1,8 @@
 The .\get_moref.ps1 script is tested on a V12.1 Configuration Database running locally on PostgreSQL 15 on the VBR Server and vCenter 7.0.2 Servers.
 
+This script is NOT supported by Veeam in any way! If you have the option, use "Quick Migration" (with running VM, VMware Tools & installed and the 
+"delete source machine after successful migration" checkbox enabled), because then manual database edits are not needed at all!
+
 Short description:
 
     1. Copy the script to your VBR Server and it would be nice if the VMware-PowerCLI PowerShell module is already installed
