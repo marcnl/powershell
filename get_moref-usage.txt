@@ -1,0 +1,75 @@
+The .\get_moref.ps1 script is tested on a V12.1 Configuration Database running locally on PostgreSQL 15 on the VBR Server and vCenter 7.0.2 Servers.
+
+Short description:
+
+    1. Copy the script to your VBR Server and it would be nice if the VMware-PowerCLI PowerShell module is already installed
+    2. Run the script and logon to your OLD vCenter to grab a list of VMs. Adjust the list if needed.
+    2a. If the list has been edited manually, connect to the old vCenter again so the script will get the updated data for the adjusted list of VMs
+    3. Stop and disable Backup Jobs for the affected VMs and migrate the VMs.
+    4. Run the script and logon to your NEW vCenter to grab the updated MoRef IDs and the host_id of the NEW vCenter
+    5. Run the script again, this time using the 'build' option to generate the update_moref.ps1 script that we need.
+    6. Run the .\update_moref.ps1 script to make a final Config DB Backup and after confirmation the object_id and host_id will be updated for the VMs
+    7. Reset (https://kb.vmware.com/s/article/2139574) or disable CBT, start the Backup Job(s), after that test a restore and enable CBT again
+
+
+Full description:
+
+1. First, we collect the data we need from the old vCenter (vcenter host_id, vm names, vm object_id)
+
+    1a. Go to the following directory on the VBR Server: C:\Program Files\PostgreSQL\15\bin
+    1b. Execute the script: PS C:\Program Files\PostgreSQL\15\bin> .\get_moref.ps1 <vcenter-name> <username>
+        - On the first run it will check if VMware-PowerCLI is installed and if not, it will ask you to install it
+    1c. The script will ask you if you want to connect to the old or the new vCenter
+        - On the first run, when connecting to your old (and new) vCenter server it will ask you to enter your vCenter credentials
+          These will be saved as Secure String in a fille called vcenter_[old|new]_creds.txt in the current directory
+        - Connect to the old vCenter to grab all the VM data we need
+        - Connecting to the old vCenter option will only be selected on the very first run or after you manually edited/updated 
+          the vm_list.txt file so we can grab the updated VM data
+
+
+2. After this first run, the script has saved a couple of files:
+
+    2a. vm_list.txt: this list is important. This list is used to grab the MoRef ID's from the old/new vCenter
+        - On the first run this file is created. You need to manually edit/update this file if needed
+        - Check the file and if needed remove VM names from the list (for example if you have replicas in it or 100s of VMs and want to migrate them in batches)
+        - You can also put your own text file with a batch of VMs in this directory (plain text file, one vm per line). 
+        - If the file exists, it will not be created
+    2b. vm_list_vcenter_unfiltered.txt: this file contains the full list of VMs collected from the old vCenter, including things like replicas, vCLS and .old VMs
+        On line 15 of the get_moref.ps1 script you can set the filter. By default it is set to: $vmfilter = "_replica|vCLS-|.old"
+    2b. vm_name_moref_old.txt: list of vm names and their object_ids (for reference purposes)
+    2c. moref_only_old.txt: list with only MoRef IDs, in the same order as the vm_list.txt and vm_name_moref_old.txt files
+    2d. vcenter-host_id-old.txt: the host_id of the old vCenter
+
+
+3. Migrate your VMs (this should be all the VMs that are present in the vm_list.txt file !!). Remember, if you use Veeam's Quick Migration, you don't have to do all of this!
+
+
+4. After the VMs have been migrated, connect to the new center to grab the updated MoRef IDs of the migrated VMs (again, the file vm_list.txt will be used as a source here!)
+
+    4a. Execute the script again: PS C:\Program Files\PostgreSQL\15\bin> .\get_moref2.ps1 <vcenter-name> <username> 
+        - Connect to the new vCenter to grab all the VM data we need (vcenter host_id, vm names, vm object_id)
+        - The script will collect the same files as in 2b, 2c and 2d (but with filenams ending with *_new.txt)
+
+
+5. After we have collected the old VM data, have migrated the VMs and have collected the updated VM data from the new vCenter, let's build the script we can execute to update 
+   the MoRef IDs in the Veeam Configuration Database
+
+    5a. Execute the script again, this time with the build option: PS C:\Program Files\PostgreSQL\15\bin> .\get_moref.ps1 build 
+    5b. After the script has finished, it has created a file called update_moref.ps1
+
+
+6. The update_moref.ps1 script is what you need to execute to actually update the MoRef IDs in the Veeam Configuration Database!
+
+    6a. Execute the script: PS C:\Program Files\PostgreSQL\15\bin> .\update_moref.ps1 
+    6b. The update_moref.ps1 will make one last Configuration DB Backup, show you the status and ask you if you are sure  want to continue
+    6c. If you answer yes, it will update all the VMs with the new MoRef ID in the Veeam Configuration Database, by using commands like this where 11111111 is the new vCenter 
+        host_id and vm-100x is the new VM object_id:
+
+        .\psql -U postgres -c "\c VeeamBackup;" -c "UPDATE public.BObjects SET host_id =11111111-1111-1111-1111-111111111111, object_id ='vm-1001' WHERE object_id ='vm-0001'"
+        .\psql -U postgres -c "\c VeeamBackup;" -c "UPDATE public.BObjects SET host_id =11111111-1111-1111-1111-111111111111, object_id ='vm-1002' WHERE object_id ='vm-0002'"
+        .\psql -U postgres -c "\c VeeamBackup;" -c "UPDATE public.BObjects SET host_id =11111111-1111-1111-1111-111111111111, object_id ='vm-1003' WHERE object_id ='vm-0003'"
+
+7. Do not touch/edit/update/delete any other files than the vm_list.txt file. All other files will be automatically build!
+
+Note: There is one line (159) in the script that is set to ignore the InvalidCertificateAction in VMware-PowerCLI to supress warnings for default/Self-Signed Certs for vCenter. 
+      If needed, set it back to $true after you are done with the script: Set-PowerCLIConfiguration -InvalidCertificateAction Ignore -Confirm:$false
